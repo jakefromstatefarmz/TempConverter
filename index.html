@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Converter</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Times New Roman', Times, serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 100px 20vw;
+        }
+
+        /* Dark mode (default) */
+        body.dark-mode {
+            color: white;
+            background: #202731;
+        }
+
+        .converter-container.dark-mode {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Light mode */
+        body.light-mode {
+            color: #333;
+            background: #ffdab9;
+        }
+
+        .converter-container.light-mode {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .converter-container {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .converter-container h1 {
+            margin-bottom: 50px;
+            font-size: 24px;
+        }
+
+        .converter-container input,
+        .converter-container select,
+        .converter-container button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .converter-container button {
+            background: #306ec4;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .converter-container button:hover {
+            background: #1a4a8a;
+        }
+
+        /* Light mode button styles */
+        body.light-mode .converter-container button {
+        background: #ffa500; /* Orange background (sun-like) */
+        color: white; /* White text for contrast */
+        }
+
+        body.light-mode .converter-container button:hover {
+        background: #ff8c00; /* Darker orange on hover */
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .error {
+            color: #ff6b6b;
+            margin-top: 10px;
+        }
+
+        /* Theme toggle container */
+        .theme-toggle-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Round button */
+        #themeToggle {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: #306ec4;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        #themeToggle:hover {
+            background: #1a4a8a;
+        }
+
+        /* Dark mode button styles */
+        #themeToggle.dark-mode {
+        background: #306ec4; /* Blue background for dark mode */
+        color: white; /* Moon emoji color */
+        }
+
+        /* Light mode button styles */
+        #themeToggle.light-mode {
+        background: linear-gradient(45deg, #87CEEB, #ADD8E6); /* Sky blue gradient */
+        color: #ffd700; /* Sun emoji color (gold) */
+        }
+
+        /* Theme label text */
+        #themeLabel {
+            font-size: 16px;
+            color: white;
+        }
+
+        body.light-mode #themeLabel {
+            color: #333;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <div class="theme-toggle-container">
+        <button id="themeToggle" class="dark-mode">🌙</button>
+        <span id="themeLabel">Dark Mode</span>
+    </div>
+
+    <div class="converter-container dark-mode">
+        <h1>Temperature Converter</h1><br /> Select a Conversion Type Below
+        <select id="unitSelect">
+            <option value="celsius">Celsius to Fahrenheit</option>
+            <option value="fahrenheit">Fahrenheit to Celsius</option>
+        </select>
+        <div class="error" id="error"></div>
+        <input type="number" id="temperatureInput" placeholder="Enter temperature">
+        <button id="convertButton">Convert</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Theme toggle logic
+        const themeToggle = document.getElementById("themeToggle");
+        const themeLabel = document.getElementById("themeLabel");
+        const body = document.body;
+        const converterContainer = document.querySelector(".converter-container");
+
+        // Initialize dark mode by default
+        body.classList.add("dark-mode");
+        converterContainer.classList.add("dark-mode");
+
+        themeToggle.addEventListener("click", function () {
+            // Toggle between light/dark mode
+            if (body.classList.contains("dark-mode")) {
+                // Switch to light mode
+                body.classList.remove("dark-mode");
+                body.classList.add("light-mode");
+                converterContainer.classList.remove("dark-mode");
+                converterContainer.classList.add("light-mode");
+                themeToggle.textContent = "☀️";
+                themeLabel.textContent = "Light Mode";
+                themeToggle.classList.remove("dark-mode");
+                themeToggle.classList.add("light-mode");
+            } else {
+                // Switch to dark mode
+                body.classList.remove("light-mode");
+                body.classList.add("dark-mode");
+                converterContainer.classList.remove("light-mode");
+                converterContainer.classList.add("dark-mode");
+                themeToggle.textContent = "🌙";
+                themeLabel.textContent = "Dark Mode";
+                themeToggle.classList.remove("light-mode");
+                themeToggle.classList.add("dark-mode");
+            }
+        });
+
+        // Conversion logic
+        document.getElementById("convertButton").addEventListener("click", function () {
+            // Get user input and UI elements
+            const temperatureInput = document.getElementById("temperatureInput").value;
+            const unitSelect = document.getElementById("unitSelect").value;
+            const resultDiv = document.getElementById("result");
+            const errorDiv = document.getElementById("error");
+
+            // Clear previous results/errors
+            resultDiv.textContent = "";
+            errorDiv.textContent = "";
+
+            // Input validation
+            // Check 1: Empty input
+            if (!temperatureInput) {
+                errorDiv.textContent = "Please enter a temperature.";
+                return; // Stop execution if invalid
+            }
+
+            // Check 2: Non-numeric input
+            const temperature = parseFloat(temperatureInput);
+            if (isNaN(temperature)) {
+                errorDiv.textContent = "Please enter a valid number.";
+                return; // Stop execution if invalid
+            }
+
+            // Conversion logic based on selected unit
+            let convertedTemperature;
+            if (unitSelect === "celsius") {
+                // Celsius → Fahrenheit formula: (C × 9/5) + 32
+                convertedTemperature = (temperature * 9 / 5) + 32;
+                resultDiv.textContent = `${temperature}°C is ${convertedTemperature.toFixed(2)}°F`;
+            } else {
+                // Fahrenheit → Celsius formula: (F − 32) × 5/9
+                convertedTemperature = (temperature - 32) * 5 / 9;
+                resultDiv.textContent = `${temperature}°F is ${convertedTemperature.toFixed(2)}°C`;
+            }
+        });
+    </script>
+</body>
+</html>
